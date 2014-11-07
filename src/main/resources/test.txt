@@ -1,7 +1,0 @@
-
-somename "eee"
-
-class const "rr" {
-}
-
-
