@@ -3,8 +3,9 @@
 <language name="$name" version="1.00" kateversion="2.4" section="Sources" extensions="*.cpp;*.h">
   <highlighting>
     <list name="somename">
-      <item> class </item>
-      <item> const </item>
+#foreach ($kw in $keywords)
+      <item>$kw</item>
+#end
     </list>
     <contexts>
       <context attribute="Normal Text" lineEndContext="#pop" name="Normal Text">
