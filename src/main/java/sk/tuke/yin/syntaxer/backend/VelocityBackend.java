@@ -44,9 +44,7 @@ public class VelocityBackend {
         Template template = ve.getTemplate(templateName);
         template.merge(context, writer);
         template.process();
-//        writer.flush();
         writer.close();
- //       return writer;
     }
 
     public static class BackendBuilder {
@@ -73,7 +71,8 @@ public class VelocityBackend {
             return this;
         }
 
-        public VelocityBackend build() throws IOException {
+        public VelocityBackend build() throws IOException, IllegalArgumentException,
+                IllegalStateException {
             String template = null;
             Writer writer = null;
             if (editorId == null) {
@@ -103,6 +102,7 @@ public class VelocityBackend {
                 case FILE:
                     if (writeToCustom.length == 1 && writeToCustom[0] instanceof Path) {
                         Path path = (Path) writeToCustom[0];
+                        //TODO yin: Make a Writer provider, so it will be instantiated as late as possible
                         writer = new FileWriter(path.toFile());
                     } else {
                         throw new IllegalArgumentException("File path not specified. Path can be "

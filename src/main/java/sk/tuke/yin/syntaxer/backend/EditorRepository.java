@@ -1,12 +1,10 @@
 package sk.tuke.yin.syntaxer.backend;
 
-import java.util.Map;
-
 import com.google.common.collect.ImmutableMap;
 
 public class EditorRepository {
     private static EditorRepository instance;
-    public final Map<String, EditorConfig> editors;
+    private final ImmutableMap<String, EditorConfig> editors;
 
     private EditorRepository() {
         editors = new ImmutableMap.Builder<String, EditorConfig>()
@@ -25,9 +23,13 @@ public class EditorRepository {
         return instance;
     }
 
-    public EditorConfig getEditorForId(String editorId) {
+    public EditorConfig getEditorForId(String editorId) throws IllegalArgumentException {
         EditorConfig cfg = editors.get(editorId);
-        return cfg;
+        if (cfg != null) {
+            return cfg;
+        } else {
+            throw new IllegalArgumentException("Unknown editor: " + editorId);
+        }
     }
 
     public static class EditorConfig {
