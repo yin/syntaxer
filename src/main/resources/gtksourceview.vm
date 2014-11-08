@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language SYSTEM "language.dtd">
+<language id="lang" name="$name" version="1.00" section="Source">
+  <metadata>
+    <mimetypes></mimetypes>
+    <globs></globs>
+  <metadata>
+  
+  <styles>
+    <style id="normalStyle" name="Text"/>
+    <style id="keywordStyle" name="Keyword"/>
+  </styles>
+  <definitions>
+    <context id="lang" style-ref="normalStyle">
+      #if (!$keywords.isEmpty() )
+        <context id="keyword" style-ref="keywordStyle">
+          #foreach ($keyword in $keywords)
+            <keyword>$keyword</keyword>
+          #end
+         </context>
+       #end
+     </context>
+   </definitions>
+</language>

@@ -1,5 +1,6 @@
 package sk.tuke.yin.syntaxer.model;
 
+//TODO yin: This class should abstractly represent editor style.
 public class Color {
 	public byte red, green, blue;
 
