@@ -8,6 +8,7 @@ import java.util.Properties;
 import javax.annotation.processing.Filer;
 
 import sk.tuke.yin.syntaxer.backend.VelocityBackend;
+import sk.tuke.yin.syntaxer.backend.VelocityBackend.BackendBuilder.WriteTo;
 import sk.tuke.yin.syntaxer.model.ColorMapping;
 import sk.tuke.yin.syntaxer.model.HighlightingModel;
 import yajco.generator.parsergen.CompilerGenerator;
@@ -23,7 +24,6 @@ import yajco.model.pattern.PropertyPattern;
 
 public class HighlightingGenerator implements CompilerGenerator {
 
-	HighlightingModel model = new HighlightingModel();
 
 	@Override
 	public void generateFiles(Language lang, Filer arg1, Properties arg2,
@@ -43,16 +43,18 @@ public class HighlightingGenerator implements CompilerGenerator {
 		LanguageVisitor visitor = new LanguageVisitor(acceptor);
 		visitor.visit(language);
 		try {
-			VelocityBackend backend = VelocityBackend.getFileBackend(geOutputPath(model));
+			VelocityBackend backend = new VelocityBackend.BackendBuilder()
+				.writeTo(WriteTo.FILE, getOutputPath(model))
+				.targetEditor("kate")
+				.build();
 			backend.write(model);
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to write output.", e);
 		}
 	}
 
-	private Path geOutputPath(HighlightingModel model) {
-		return Paths
-				.get(model.getLanguageName() + ".Syntax");
+	private Path getOutputPath(HighlightingModel model) {
+		return Paths.get(model.getLanguageName() + ".Syntax");
 	}
 
 	public static interface LanguageAcceptor {
