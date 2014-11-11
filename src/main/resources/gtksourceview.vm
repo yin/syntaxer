@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE language SYSTEM "language.dtd">
-<language id="lang" name="$name" version="1.00" section="Source">
+<language id="$id" name="$name" version="1.00" section="Source">
   <metadata>
     <mimetypes></mimetypes>
     <globs></globs>

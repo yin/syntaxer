@@ -19,6 +19,7 @@ import yajco.model.Notation;
 import yajco.model.NotationPart;
 import yajco.model.Property;
 import yajco.model.TokenPart;
+import yajco.model.pattern.ConceptPattern;
 import yajco.model.pattern.NotationPattern;
 import yajco.model.pattern.PropertyPattern;
 
@@ -119,12 +120,15 @@ public class HighlightingGenerator implements CompilerGenerator {
     public static class LanguageVisitor {
 
         private LanguageAcceptor acceptor;
+        
+        private Language language;
 
         public LanguageVisitor(LanguageAcceptor acceptor) {
             this.acceptor = acceptor;
         }
 
         public void visit(Language language) {
+            this.language = language;
             for (Concept concept : language.getConcepts()) {
                 acceptor.acceptLanguage(language);
                 this.visit(concept);
@@ -132,24 +136,28 @@ public class HighlightingGenerator implements CompilerGenerator {
         }
 
         public void visit(Concept concept) {
-            for (Property p : concept.getAbstractSyntax()) {
-                visit(p);
+            System.out.println(">> Concept: " + concept.getName());
+            for (Property property : concept.getAbstractSyntax()) {
+                visit(property);
             }
             for (Notation notation : concept.getConcreteSyntax()) {
                 visit(notation);
             }
+            for (ConceptPattern pattern: concept.getPatterns()) {
+                visit(pattern);
+            }
         }
 
+        // Concept children
         private void visit(Property property) {
+            System.out.println(">> Property: " + property.getName());
             for (PropertyPattern propPattern : property.getPatterns()) {
                 visit(propPattern);
             }
         }
 
-        private void visit(PropertyPattern propPattern) {
-        }
-
         private void visit(Notation notation) {
+            System.out.println(">> Notation: " + notation);
             for (NotationPart notationPart : notation.getParts()) {
                 visit(notationPart);
             }
@@ -158,10 +166,20 @@ public class HighlightingGenerator implements CompilerGenerator {
             }
         }
 
+        private void visit(ConceptPattern pattern) {
+            System.out.println(">>  ConceptPattern " + pattern.toString());
+        }
+        
+        // Concept grandchildren
+        private void visit(PropertyPattern propPattern) {
+            System.out.println(">> PropPatt: " + propPattern.toString());
+        }
+
         private void visit(NotationPart notationPart) {
+            System.out.println(">> NotationPart: " + notationPart);
             if (notationPart instanceof TokenPart) {
                 TokenPart tp = (TokenPart) notationPart;
-                String token = tp.getToken();
+                String token = language.getToken(tp.getToken()).getRegexp(); 
                 if (token.matches("^[a-zA-Z0-9]+$")) {
                     acceptor.acceptKeyword(token);
                 }
@@ -169,6 +187,7 @@ public class HighlightingGenerator implements CompilerGenerator {
         }
 
         private void visit(NotationPattern notationPattern) {
+            System.out.println(">> NotationPattern" + notationPattern.toString());
         }
     }
 }
