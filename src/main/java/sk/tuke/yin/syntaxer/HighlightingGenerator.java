@@ -18,6 +18,7 @@ import yajco.model.Language;
 import yajco.model.Notation;
 import yajco.model.NotationPart;
 import yajco.model.Property;
+import yajco.model.TokenDef;
 import yajco.model.TokenPart;
 import yajco.model.pattern.ConceptPattern;
 import yajco.model.pattern.NotationPattern;
@@ -150,7 +151,7 @@ public class HighlightingGenerator implements CompilerGenerator {
 
         // Concept children
         private void visit(Property property) {
-            System.out.println(">> Property: " + property.getName());
+            System.out.println(">> Property: " + property.getName() + " type:" + property.getType());
             for (PropertyPattern propPattern : property.getPatterns()) {
                 visit(propPattern);
             }
@@ -179,7 +180,11 @@ public class HighlightingGenerator implements CompilerGenerator {
             System.out.println(">> NotationPart: " + notationPart);
             if (notationPart instanceof TokenPart) {
                 TokenPart tp = (TokenPart) notationPart;
-                String token = language.getToken(tp.getToken()).getRegexp(); 
+                String token = tp.getToken();
+                TokenDef tokenDef = language.getToken(token);
+                if (tokenDef != null) {
+                    token = tokenDef.getRegexp(); 
+                }
                 if (token.matches("^[a-zA-Z0-9]+$")) {
                     acceptor.acceptKeyword(token);
                 }
