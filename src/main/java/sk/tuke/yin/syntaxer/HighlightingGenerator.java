@@ -19,6 +19,7 @@ import yajco.model.Language;
 import yajco.model.Notation;
 import yajco.model.NotationPart;
 import yajco.model.Property;
+import yajco.model.SkipDef;
 import yajco.model.TokenDef;
 import yajco.model.TokenPart;
 import yajco.model.pattern.ConceptPattern;
@@ -82,6 +83,8 @@ public class HighlightingGenerator implements CompilerGenerator {
         public void acceptOperator(String operator);
         
         public void acceptLiteral(String operator, LiteralType type);
+
+        public void acceptComment(String regexp);
     }
 
     public static class ModelAcceptor implements LanguageAcceptor {
@@ -111,7 +114,15 @@ public class HighlightingGenerator implements CompilerGenerator {
         @Override
         public void acceptLiteral(String literal, LiteralType type) {
             model.addLiteral(literal, type);
-            System.out.println("ACCEPTED literal:" + literal);
+            System.out.println("ACCEPTED literal: " + literal);
+        }
+
+        @Override
+        public void acceptComment(String regexp) {
+            if (!regexp.trim().isEmpty()) {
+                model.addComment(regexp);
+                System.out.println("ACCEPTED comment: " + regexp);
+            }
         }
     }
 
@@ -140,6 +151,21 @@ public class HighlightingGenerator implements CompilerGenerator {
                 acceptor.acceptLanguage(language);
                 this.visit(concept);
             }
+            for (SkipDef skip : language.getSkips()) {
+                visit(skip);
+            }
+        }
+
+        private void visit(SkipDef skip) {
+           String regexp = skip.getRegexp(); 
+           if (regexp.length() > 0) {
+               // TODO yin: This is very crude way of detecting non-whitespace characters in regexp
+               if (!regexp.matches("^(\\[|\\[)?(\\\\s|\\\\t|\\\\n|\\\\r)")) {
+                   acceptor.acceptComment(regexp);
+               }
+               else 
+               System.out.println("   >>>>>>>>>>>>>>>>>>>>>   <<<<<<<<<<<<<<<< " + "no matCH!");
+           }
         }
 
         public void visit(Concept concept) {

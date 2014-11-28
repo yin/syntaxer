@@ -14,9 +14,14 @@ public class HighlightingModel {
     private String name;
     private List<String> keywords = new ArrayList<String>();
     private List<String> operators = new ArrayList<String>();
-    private List<Literal> literals = 
-            new ArrayList<Literal>();
+    private List<Literal> literals = new ArrayList<Literal>();
+    private List<String> comments = new ArrayList<String>();
 	
+    public static enum TokenType {
+        KEYWORD, OPERATOR, LITERAL, COMMENT;
+        //TODO yin: FUNCTION, VARIABLE, etc.
+    }
+    
 	public void setLanguageName(String name) {
 	    this.name = name;
 	}
@@ -59,7 +64,15 @@ public class HighlightingModel {
             }
         });
     }
+    
+    public void addComment(String regexp) {
+        comments.add(regexp);
+    }
 
+    public Iterable<String> getComments() {
+        return comments;
+    }
+    
     // Consider using strategy pattern
     public static enum LiteralType {
         STRING, NUMBER, CHAR, OTHER;
