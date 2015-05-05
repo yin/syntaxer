@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE language SYSTEM "language.dtd">
-<language name="YajCo $name" version="1.00" kateversion="2.4" section="Sources" extensions="$globs">
+<language name="YajCo $languageName" version="1.00" kateversion="2.4" section="Sources" extensions="$globs">
   <highlighting>
     #if (!$keywords.isEmpty() )
       <list name="keywords">
@@ -15,6 +15,11 @@
         <keyword attribute="Keyword" context="#stay" String="keywords"/>
         #foreach ($comment in $comments)
           <RegExpr attribute="Comment"  context="#stay" String="$comment" />
+        #end
+        #if (!$literal.NUMBER)
+        #foreach ($l in $literal.NUMBER)
+          <!-- $l -->
+        #end
         #end
       </context>
     </contexts>

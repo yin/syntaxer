@@ -13,64 +13,42 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
-import sk.tuke.yin.syntaxer.model.HighlightingModel;
-import sk.tuke.yin.syntaxer.model.HighlightingModel.LiteralType;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
+import sk.tuke.yin.syntaxer.model.Model;
 
 public class VelocityBackend {
     private final EditorStrategy strategy;
     private final Writer writer;
-    
-    public static interface EditorStrategy {
-        public String getEditorId();
-        public String getEditorName();
-        public String getTemplateFile();
-        public String getOutputSuffix();
-        public String transformRegexp(String regexp, String type);
-    }
 
     public VelocityBackend(EditorStrategy strategy, Writer writer) {
         this.strategy = strategy;
         this.writer = writer;
     }
 
-    public VelocityContext modelToContext(HighlightingModel model) {
-        VelocityContext context = new VelocityContext();
-        context.put("name", model.getLanguageName());
-        putToContext("keywords", model.getKeywords(), context);
-        putToContext("operators", model.getOperators(), context);
-        putToContext("literalStrings", model.getLiterals(LiteralType.STRING), context);
-        putToContext("literalChars", model.getLiterals(LiteralType.CHAR), context);
-        putToContext("literalNumbers", model.getLiterals(LiteralType.NUMBER), context);
-        putToContext("literalOthers", model.getLiterals(LiteralType.OTHER), context);
-        putToContext("comments", model.getComments(), context);
-        
-        return context;
-    }
-
-    private void putToContext(String type, Iterable<String> items, VelocityContext context) {
-        Builder<String> builder = ImmutableList.builder();
-        for (String item : items) {
-                builder.add(strategy.transformRegexp(item, type));
-        }
-        context.put(type, builder.build());
-    }
-
-    public void write(HighlightingModel model) throws IOException {
+    public void write(Model model) throws IOException {
         VelocityEngine ve = new VelocityEngine();
         ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
         ve.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
         ve.init();
 
-        VelocityContext context = modelToContext(model);
+        VelocityContext context = strategy.getContext(model);
         Template template = ve.getTemplate(strategy.getTemplateFile());
         template.merge(context, writer);
         template.process();
         writer.close();
     }
 
+    public static interface EditorStrategy {
+        public String getEditorId();
+        
+        public String getEditorName();
+        
+        public String getTemplateFile();
+        
+        public String getOutputSuffix();
+        
+        public VelocityContext getContext(Model model);
+    }
+    
     public static class BackendBuilder {
         WriteTo writeTo;
         Object[] writeToCustom;
@@ -80,7 +58,7 @@ public class VelocityBackend {
         public enum WriteTo {
             STDOUT, STRING, FILE, CUSTOM;
         }
-        
+
         public BackendBuilder() {
         }
 
@@ -121,7 +99,6 @@ public class VelocityBackend {
                     if (writeToCustom.length == 1 && writeToCustom[0] instanceof Path) {
                         Path path = (Path) writeToCustom[0];
                         //TODO yin: Make a Writer provider, so it will be instantiated as late as possible
-                        System.out.println(">>>>>>>>>>>>>>>> <<<<<<<<<<<<<<<<< >>>> " + path.toFile().toString());
                         writer = new FileWriter(path.toFile());
                     } else {
                         throw new IllegalArgumentException("File path not specified. Path can be "

@@ -7,12 +7,11 @@ import java.util.Properties;
 
 import javax.annotation.processing.Filer;
 
+import sk.tuke.yin.syntaxer.HighlightingGenerator.LanguageAcceptor.LiteralType;
 import sk.tuke.yin.syntaxer.backend.EditorRepository;
 import sk.tuke.yin.syntaxer.backend.VelocityBackend;
 import sk.tuke.yin.syntaxer.backend.VelocityBackend.BackendBuilder.WriteTo;
-import sk.tuke.yin.syntaxer.model.ColorMapping;
-import sk.tuke.yin.syntaxer.model.HighlightingModel;
-import sk.tuke.yin.syntaxer.model.HighlightingModel.LiteralType;
+import sk.tuke.yin.syntaxer.model.SimpleModel;
 import yajco.generator.parsergen.CompilerGenerator;
 import yajco.model.Concept;
 import yajco.model.Language;
@@ -50,7 +49,7 @@ public class HighlightingGenerator implements CompilerGenerator {
     }
 
     private void processLanguage(Language language) {
-        HighlightingModel model = new HighlightingModel();
+        SimpleModel model = new SimpleModel();
         ModelAcceptor acceptor = new ModelAcceptor(model);
         LanguageVisitor visitor = new LanguageVisitor(acceptor);
         visitor.visit(language);
@@ -66,27 +65,31 @@ public class HighlightingGenerator implements CompilerGenerator {
     }
 
     private static String getEditorId() {
-        String id = System.getenv(EDITOR_ID_VAR);
+        String id = System.getProperty(EDITOR_ID_VAR);
         if (id == null) {
             id = DEFAULT_EDITOR;
         }
         return id;
     }
 
-    private Path getOutputPath(HighlightingModel model) {
-        String languageName = model.getLanguageName();
+    private Path getOutputPath(SimpleModel model) {
+        String languageName = model.getValue("languageName");
         String suffix = EditorRepository.instance().getEditorForId(getEditorId()).getOutputSuffix();
         return Paths.get(languageName + '.' + suffix);
     }
 
     public static interface LanguageAcceptor {
+        public static enum LiteralType {
+            NUMBER, STRING, CHAR, OTHER;
+        }
+        
         public void acceptLanguage(Language language);
 
         public void acceptKeyword(String keyword);
 
         public void acceptOperator(String operator);
 
-        public void acceptLiteral(String operator, LiteralType type);
+        public void acceptLiteral(String regexp, LiteralType type);
 
         public void acceptComment(String regexp);
 
@@ -94,39 +97,39 @@ public class HighlightingGenerator implements CompilerGenerator {
     }
 
     public static class ModelAcceptor implements LanguageAcceptor {
-        private final HighlightingModel model;
+        private final SimpleModel model;
 
-        public ModelAcceptor(HighlightingModel model) {
+        public ModelAcceptor(SimpleModel model) {
             this.model = model;
         }
 
         @Override
         public void acceptLanguage(Language language) {
-            model.setLanguageName(language.getName());
+            model.setValue("languageName", language.getName());
         }
 
         @Override
         public void acceptKeyword(String keyword) {
-            model.addKeyword(keyword);
+            model.addToken("keywords", keyword);
             _log("ACCEPTED keyword: " + keyword);
         }
 
         @Override
         public void acceptOperator(String operator) {
-            model.addOperator(operator);
+            model.addToken("operators", operator);
             _log("ACCEPTED operator: " + operator);
         }
 
         @Override
         public void acceptLiteral(String literal, LiteralType type) {
-            model.addLiteral(literal, type);
+            model.addToken("literals." + type.name().toLowerCase(), literal);
             _log("ACCEPTED literal: " + literal);
         }
 
         @Override
         public void acceptComment(String regexp) {
             if (!regexp.trim().isEmpty()) {
-                model.addComment(regexp);
+                model.addToken("comments", regexp);
                 _log("ACCEPTED comment: " + regexp);
             }
         }
@@ -139,29 +142,20 @@ public class HighlightingGenerator implements CompilerGenerator {
 
     public static class LanguageVisitor {
 
+        private static final String WHITESPACE_REGEXP = "^(\\[|\\[)?( |\\\\s|\\\\t|\\\\n|\\\\r)";
         private static final String OPERATOR_REGEXP = "^((?!\\\\s)[^\\s])+$";
         private static final String KEYWORD_REGEXP = "^[a-zA-Z0-9]+$";
-        private static final String LITERAL_REGEXP = "([0-9]+|[0-9]*\\.[0-9]+|0x[0-9a-fA-F]+)";
+        private static final String NUMBER_LITERAL_REGEXP = "([0-9]+|[0-9]*\\.[0-9]+|0x[0-9a-fA-F]+)";
+        private static final String STRING_LITERAL_REGEXP = "\"[^\"]*\"";
         private final LanguageAcceptor acceptor;
-        private Language language;
-
-        static class VisitorState {
-            VisitorState previous;
-            
-        }
-        enum LanguagePart {
-            // Unmarked - KEYWORDs, LITERALs etc.
-            UNDETERMINED,
-            // ConceptPattern's
-            OPERATOR;
-        }
+        private VisitorState state = new VisitorState();
 
         public LanguageVisitor(LanguageAcceptor acceptor) {
             this.acceptor = acceptor;
         }
 
         public void visit(Language language) {
-            this.language = language;
+            state.setLanguage(language);
             // Detect comments
             for (SkipDef skip : language.getSkips()) {
                 visit(skip);
@@ -178,7 +172,7 @@ public class HighlightingGenerator implements CompilerGenerator {
             String regexp = skip.getRegexp();
             if (regexp.length() > 0) {
                 // TODO yin: This is very crude way of detecting non-whitespace characters in regexp
-                if (!regexp.matches("^(\\[|\\[)?( |\\\\s|\\\\t|\\\\n|\\\\r)")) {
+                if (!regexp.matches(WHITESPACE_REGEXP)) {
                     acceptor.acceptComment(regexp);
                 } else {
                     acceptor.rejectedComment(regexp);
@@ -186,87 +180,81 @@ public class HighlightingGenerator implements CompilerGenerator {
             }
         }
 
-        public void visit(Concept concept) {
+        private void visit(Concept concept) {
             _log("> Concept: " + concept.getName());
-            // TODO: Consider using EnumSet, or rule it out completely
-            LanguagePart languagePart = LanguagePart.UNDETERMINED;
+            state.openConcept(concept);
             for (ConceptPattern conceptPattern : concept.getPatterns()) {
-                LanguagePart newLanguagePart = visit(conceptPattern);
-                if (languagePart == LanguagePart.UNDETERMINED) {
-                    languagePart = newLanguagePart;
-                }
+                visit(conceptPattern);
             }
             for (Property property : concept.getAbstractSyntax()) {
                 visit(property);
             }
             for (Notation notation : concept.getConcreteSyntax()) {
-                visit(notation, languagePart);
+                visit(notation);
             }
+            state.closeConcept();
         }
 
-        // Concept children - ConceptPattern, Property, Notation
-        private LanguagePart visit(ConceptPattern pattern) {
-            _log(">>  ConceptPattern(operators/other): " + pattern.toString());
-            // Ignore for highlighting: Enum, Parentheses
+        private void visit(ConceptPattern pattern) {
+            _log(">>  ConceptPattern(@Operator): " + pattern.toString());
             if (pattern instanceof Operator) {
-                return LanguagePart.OPERATOR;
+                state.setOperator(true);
+            } else {
+                // Ignore for highlighting: Enum, Parentheses
             }
-            return LanguagePart.UNDETERMINED;
         }
 
         private void visit(Property property) {
-            _log(">> Property: " + property.getName() + " type:" + property.getType());
+            _log(">> Property (fields+constructor.params): " + property.getName() + " type:"
+                    + property.getType());
             for (PropertyPattern propPattern : property.getPatterns()) {
                 visit(propPattern);
             }
         }
 
-        private void visit(Notation notation, LanguagePart languagePart) {
-            _log(">> Notation: " + notation);
+        private void visit(PropertyPattern propertyPattern) {
+            _log(">>> PropertyPattern(@Identifier): " + propertyPattern.toString());
+        }
+
+        private void visit(Notation notation) {
+            _log(">> Notation(constructor): " + notation + notation.12);
             for (NotationPart notationPart : notation.getParts()) {
-                visit(notationPart, languagePart);
+                visit(notationPart);
             }
             for (NotationPattern notationPattern : notation.getPatterns()) {
                 visit(notationPattern);
             }
         }
 
-        // Concept grandchildren - PropertyPattern, NotationPart, NotationPattern
-        private void visit(PropertyPattern propertyPattern) {
-            _log(">>> PropertyPattern: " + propertyPattern.toString());
-        }
-
-        private void visit(NotationPart notationPart, LanguagePart languagePart) {
+        private void visit(NotationPart notationPart) {
             _log(">>> NotationPart: " + notationPart);
             if (notationPart instanceof TokenPart) {
-                visit((TokenPart) notationPart, languagePart);
+                visit((TokenPart) notationPart);
             } else if (notationPart instanceof PropertyReferencePart) {
+                // name declarations
                 visit((PropertyReferencePart) notationPart);
             } else if (notationPart instanceof LocalVariablePart) {
+                // name references
                 visit((LocalVariablePart) notationPart);
             }
         }
 
-        private void visit(NotationPattern notationPattern) {
-            _log(">>> NotationPattern " + notationPattern.toString());
-        }
-        
-        // grandchildren: NotationPart's - TokenPart - TODO: LocalVariablePart, PropertyReferencePart
-        private void visit(TokenPart tokenPart, LanguagePart languagePart) {
+        private void visit(TokenPart tokenPart) {
             _log(">>>> TokenPart: " + tokenPart.toString());
-            if (languagePart == LanguagePart.UNDETERMINED) {
-                String token = tokenPart.getToken(), regexp;
-                if ((regexp = ifMatchesGetRegexp(token, KEYWORD_REGEXP)) != null) {
-                    acceptor.acceptKeyword(regexp);
-                } else if ((regexp = ifMatchesGetRegexp(token, LITERAL_REGEXP)) != null) {
-                    // The token might be an identifier string
 
-                }
-            } else if (languagePart == LanguagePart.OPERATOR) {
-                String token = tokenPart.getToken(), regexp;
+            String token = tokenPart.getToken(), regexp;
+            if (state.isOperator()) {
                 if ((regexp = ifMatchesGetRegexp(token, OPERATOR_REGEXP)) != null) {
                     acceptor.acceptOperator(regexp);
                 }
+            } else {
+                if ((regexp = ifMatchesGetRegexp(token, KEYWORD_REGEXP)) != null) {
+                    acceptor.acceptKeyword(regexp);
+                } else if ((regexp = ifMatchesGetRegexp(token, NUMBER_LITERAL_REGEXP)) != null) {
+                    acceptor.acceptLiteral(regexp, LiteralType.NUMBER);
+                } else if ((regexp = ifMatchesGetRegexp(token, STRING_LITERAL_REGEXP)) != null) {
+                    acceptor.acceptLiteral(regexp, LiteralType.STRING);
+                } //TODO yin: STRING, etc.
             }
         }
 
@@ -276,7 +264,7 @@ public class HighlightingGenerator implements CompilerGenerator {
                 visit(notationPartPatttern);
             }
         }
-        
+
         private void visit(LocalVariablePart localVariablePart) {
             _log(">>>> LocalVariablePart: " + localVariablePart.toString());
             for (NotationPartPattern notationPartPatttern : localVariablePart.getPatterns()) {
@@ -288,18 +276,66 @@ public class HighlightingGenerator implements CompilerGenerator {
             _log(">>>>> NotationPartPattern " + notationPartPatttern);
             if (notationPartPatttern instanceof References) {
                 References ref = (References) notationPartPatttern;
-               _log("      ref.property = " + ref.getProperty().getName());
+                _log("      ref.property = " + ref.getProperty().getName());
             }
         }
-        
+
+        private void visit(NotationPattern notationPattern) {
+            _log(">>> NotationPattern(@Factory) " + notationPattern.toString());
+        }
+
         // Utils
         private String ifMatchesGetRegexp(String token, String superRegexp) {
             String tokenRegexp = token;
-            TokenDef tokenDef = language.getToken(token);
-            if (tokenDef != null) {
+            TokenDef tokenDef = state.getLanguage().getToken(token);
+            if (tokenDef != null && tokenDef.getRegexp() != null) {
                 tokenRegexp = tokenDef.getRegexp();
             }
-            return tokenRegexp.matches(superRegexp) ? token : null;
+            return tokenRegexp.matches(superRegexp) ? tokenRegexp : null;
+        }
+
+        static class VisitorState {
+            private VisitorState previous;
+            private Language language;
+            private Concept concept;
+            private boolean operator;
+
+            public VisitorState getPrevious() {
+                return previous;
+            }
+
+            public void setPrevious(VisitorState previous) {
+                this.previous = previous;
+            }
+
+            public Language getLanguage() {
+                return language;
+            }
+
+            public void setLanguage(Language language) {
+                this.language = language;
+            }
+
+            public Concept getConcept() {
+                return concept;
+            }
+
+            public void openConcept(Concept concept) {
+                this.concept = concept;
+            }
+
+            public void closeConcept() {
+                concept = null;
+                operator = false;
+            }
+
+            public boolean isOperator() {
+                return operator;
+            }
+
+            public void setOperator(boolean operator) {
+                this.operator = operator;
+            }
         }
     }
 

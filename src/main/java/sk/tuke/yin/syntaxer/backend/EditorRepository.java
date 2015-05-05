@@ -12,7 +12,7 @@ public class EditorRepository {
         editors = new ImmutableMap.Builder<String, EditorStrategy>()
                 .put("kate", new KateEditorStrategy())
                 .put("gtksourceview",
-                        new GeneralEditorStrategy("gtksourceview", "Gedit", "gtksourceview.vm", "xml"))
+                        new GeneralEditorStrategy("gtksourceview", "Gedit", "gtksourceview.vm", "gedit.xml"))
                 // .put("codemirror", new EditorConfig("codemirror.vm", "js", "CodeMirror", "codemirror"))
                 // .put("notepad++", new EditorConfig("notepadpp.vm", "???", "Notepad++", "notepad++"))
                 .build();
