@@ -129,7 +129,7 @@ public class HighlightingGenerator implements CompilerGenerator {
     public static class LanguageVisitor {
 
         private static final String OPERATOR_REGEXP = "^((?!\\\\s)[^\\s])+$";
-        private static final String KEYWORD_REGEXP = "^[a-zA-Z0-9]+$";
+        private static final String KEYWORD_REGEXP = "^[a-zA-Z_]+[a-zA-Z0-9_\\-]*$";
         private static final String LITERAL_REGEXP = "([0-9]+|[0-9]*\\.[0-9]+|0x[0-9a-fA-F]+)";
         private final LanguageAcceptor acceptor;
         private Language language;
