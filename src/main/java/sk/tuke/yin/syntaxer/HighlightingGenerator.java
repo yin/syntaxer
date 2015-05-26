@@ -25,6 +25,7 @@ import yajco.model.TokenPart;
 import yajco.model.pattern.ConceptPattern;
 import yajco.model.pattern.NotationPattern;
 import yajco.model.pattern.PropertyPattern;
+import yajco.model.pattern.impl.Identifier;
 import yajco.model.pattern.impl.Operator;
 
 public class HighlightingGenerator implements CompilerGenerator {
@@ -85,6 +86,8 @@ public class HighlightingGenerator implements CompilerGenerator {
         public void acceptLiteral(String operator, LiteralType type);
 
         public void acceptComment(String regexp);
+
+        public void acceptNonCommentSkipSymbol(String regexp);
     }
 
     public static class ModelAcceptor implements LanguageAcceptor {
@@ -122,7 +125,12 @@ public class HighlightingGenerator implements CompilerGenerator {
             if (!regexp.trim().isEmpty()) {
                 model.addComment(regexp);
                 System.out.println("ACCEPTED comment: " + regexp);
-            }
+            } //tODO yin: Log warning here
+        }
+
+        @Override
+        public void acceptNonCommentSkipSymbol(String regexp) {
+            System.out.println("IGNORED symbol: " + regexp);
         }
     }
 
@@ -162,9 +170,9 @@ public class HighlightingGenerator implements CompilerGenerator {
                // TODO yin: This is very crude way of detecting non-whitespace characters in regexp
                if (!regexp.matches("^(\\[|\\[)?(\\\\s|\\\\t|\\\\n|\\\\r)")) {
                    acceptor.acceptComment(regexp);
+               } else {
+                   acceptor.acceptNonCommentSkipSymbol(regexp);
                }
-               else 
-               System.out.println("   >>>>>>>>>>>>>>>>>>>>>   <<<<<<<<<<<<<<<< " + "no matCH!");
            }
         }
 
@@ -188,7 +196,7 @@ public class HighlightingGenerator implements CompilerGenerator {
 
         // Concept children - ConceptPattern, Property, Notation
         private LanguagePart visit(ConceptPattern pattern) {
-            System.out.println(">>  ConceptPattern: " + pattern.toString());
+            System.out.println(">>>  ConceptPattern: " + pattern.toString());
             // Ignore for highlighting: Enum, Parentheses
             if (pattern instanceof Operator ) {
                 return LanguagePart.OPERATOR;
@@ -197,14 +205,19 @@ public class HighlightingGenerator implements CompilerGenerator {
         }
         
         private void visit(Property property) {
-            System.out.println(">> Property: " + property.getName() + " type:" + property.getType());
+            System.out.println(">>> Property: " + property.getName() + " type:" + property.getType());
             for (PropertyPattern propPattern : property.getPatterns()) {
-                visit(propPattern);
+                if (propPattern instanceof Identifier) {
+                    Identifier identifier = (Identifier) propPattern;
+                    visit(identifier);
+                } else {
+                    visit(propPattern);
+                }
             }
         }
 
         private void visit(Notation notation, LanguagePart languagePart) {
-            System.out.println(">> Notation: " + notation);
+            System.out.println(">>> Notation: " + notation);
             for (NotationPart notationPart : notation.getParts()) {
                 visit(notationPart, languagePart);
             }
@@ -215,18 +228,22 @@ public class HighlightingGenerator implements CompilerGenerator {
 
         // Concept grandchildren - PropertyPattern, NotationPart, NotationPattern
         private void visit(PropertyPattern propertyPattern) {
-            System.out.println(">> PropertyPattern: " + propertyPattern.toString());
+            System.out.println(">>>> ?(PropertyPattern): " + propertyPattern.toString());
+        }
+
+        private void visit(Identifier identifier) {
+            System.out.println(">>>> Identifier(PropertyPattern): unique:" + identifier.getUnique());
         }
 
         private void visit(NotationPart notationPart, LanguagePart languagePart) {
-            System.out.println(">> NotationPart: " + notationPart);
+            System.out.println(">>>> NotationPart: " + notationPart);
             if (notationPart instanceof TokenPart) {
                 visit((TokenPart) notationPart, languagePart);
             }
         }
 
         private void visit(NotationPattern notationPattern) {
-            System.out.println(">> NotationPattern" + notationPattern.toString());
+            System.out.println(">>>> NotationPattern" + notationPattern.toString());
         }
         
         // grandchildren: NotationPart's - TokenPart - TODO: LocalVariablePart, PropertyReferencePart
