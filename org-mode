@@ -1,0 +1,37 @@
+* From Chodarev
+** TODO Zjednodusit implementaciu regexp analyzatora.
+** TODO Pouzit gtksv format 2.0
+** TODO Spomenut nedekovani hexd. & oct. cislicovych sustav yajco-m (Kate ich highlituje)
+
+* In code
+** TODO Model field "globs" to define extensions of highlited sources
+*** TODO Discuss options of using mime-types in some editor strategies.
+
+* In text
+* TODO Table list
+* TODO Images
+* Formatting:
+** DONE Headings
+** TODO Zadaci list 
+** Chapters:
+*** 3.5 Vynecháné časti práce
+**** TODO Editor Vim, Kniznica Pygments, RegExp analyzer
+*** 3.3 Pravidlá analýzy syntaxe
+**** DONE ?? SkipDef
+*** TODO 4 Analýza skutočných jazykov
+** Milestones:
+*** DONE 5 pages
+*** TODO 20 pages
+*** TODO 25 pages
+*** TODO 31 pages???
+** Definitions
+*** DONE Lexical analysis, finite automata, regexps, Syntax highl.!
+*** DONE language, syntax, code, footnotes.
+** Technologies:
+*** DONE Maven, Yajco, Java
+
+** DONE Theory: Regular exps & automata (DFA, NFA, eps-NFA, Regexps)
+** TODO Implementation: ???
+** 
+* DONE code
+** Extended keyword-recognition regexp to accept "_" & "-"
