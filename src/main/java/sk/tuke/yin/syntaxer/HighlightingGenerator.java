@@ -217,7 +217,7 @@ public class HighlightingGenerator implements CompilerGenerator {
         }
 
         private void visit(Notation notation) {
-            _log(">> Notation(constructor): " + notation + notation.12);
+            _log(">> Notation(constructor): " + notation);
             for (NotationPart notationPart : notation.getParts()) {
                 visit(notationPart);
             }
