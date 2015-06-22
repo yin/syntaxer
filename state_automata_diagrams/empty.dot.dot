@@ -1,0 +1,6 @@
+graph Empty {
+	node [label="\N"];
+	graph [bb="0,0,126,38"];
+	A [pos="27,19", width="0.75", height="0.51389"];
+	B [pos="99,19", width="0.75", height="0.51389"];
+}

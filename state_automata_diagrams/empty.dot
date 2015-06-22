@@ -1,0 +1,7 @@
+graph Empty {
+      subgraph {
+               A;
+               B;
+      }
+}
+
