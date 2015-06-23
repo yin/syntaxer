@@ -4,6 +4,11 @@
   <metadata>
     <mimetypes></mimetypes>
     <globs></globs>
+    #if (!$comments.isEmpty() )
+    #foreach ($comment in $comments)
+      <property name="line-comment-start">$comment</property>
+    #end
+    #end
   <metadata>
   
   <styles>
