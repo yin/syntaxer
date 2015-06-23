@@ -21,6 +21,7 @@ import yajco.model.pattern.impl.References;
 
 public class LanguageVisitor {
     private static final String WHITESPACE_REGEXP = "^(\\[|\\[)?( |\\\\s|\\\\t|\\\\n|\\\\r)";
+    private static final String LINE_COMMENT_REGEXP = "\\n$";
     private static final String OPERATOR_REGEXP = "^((?!\\\\s)[^\\s])+$";
     private static final String KEYWORD_REGEXP = "^[a-zA-Z_]+[a-zA-Z0-9_\\-]*$";
     private static final String NUMBER_LITERAL_REGEXP = "([0-9]+|[0-9]*\\.[0-9]+|0x[0-9a-fA-F]+)";
@@ -52,9 +53,15 @@ public class LanguageVisitor {
         if (regexp.length() > 0) {
             // TODO yin: This is very crude way of detecting non-whitespace characters in regexp
             if (!regexp.matches(WHITESPACE_REGEXP)) {
-                acceptor.acceptComment(regexp);
+                if (regexp.matches(LINE_COMMENT_REGEXP)) {
+                    acceptor.acceptLineComment(regexp);
+                } else {
+                    int len = regexp.length();
+                    String sufix = regexp.substring(len - 2, len - 1);
+                    acceptor.acceptBlockComment(regexp.substring(0, 1), sufix);
+                }
             } else {
-                acceptor.rejectedComment(regexp);
+                acceptor.acceptWhitespace(regexp);
             }
         }
     }
@@ -85,8 +92,8 @@ public class LanguageVisitor {
     }
 
     private void visit(Property property) {
-        HighlightingCompiler._log(">> Property (fields+constructor.params): " + property.getName() + " type:"
-                + property.getType());
+        HighlightingCompiler._log(">> Property (fields+constructor.params): " + property.getName()
+                + " type:" + property.getType());
         for (PropertyPattern propPattern : property.getPatterns()) {
             if (propPattern instanceof Identifier) {
                 Identifier identifier = (Identifier) propPattern;
@@ -96,7 +103,7 @@ public class LanguageVisitor {
             }
         }
     }
-    
+
     private void visit(Notation notation) {
         HighlightingCompiler._log(">> Notation(constructor): " + notation);
         for (NotationPart notationPart : notation.getParts()) {

@@ -15,7 +15,9 @@ public interface LanguageAcceptor {
 
     public void acceptLiteral(String regexp, LiteralType type);
 
-    public void acceptComment(String regexp);
+    public void acceptWhitespace(String regexp);
 
-    public void rejectedComment(String regexp);
+    public void acceptLineComment(String regexp);
+
+    public void acceptBlockComment(String substring, String sufix);
 }

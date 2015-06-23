@@ -1,5 +1,8 @@
 package sk.tuke.yin.syntaxer;
 
+import org.apache.commons.lang.NotImplementedException;
+
+import sk.tuke.yin.syntaxer.LanguageAcceptor;
 import sk.tuke.yin.syntaxer.model.SimpleModel;
 import yajco.model.Language;
 
@@ -34,17 +37,22 @@ public class ModelAcceptor implements LanguageAcceptor {
     }
 
     @Override
-    public void acceptComment(String regexp) {
+    public void acceptLineComment(String regexp) {
         if (!regexp.trim().isEmpty()) {
             model.addToken("comments", regexp);
             HighlightingCompiler._log("ACCEPTED comment: " + regexp);
         } else {
-            
+            acceptWhitespace(regexp);
         }
     }
 
     @Override
-    public void rejectedComment(String regexp) {
+    public void acceptWhitespace(String regexp) {
         HighlightingCompiler._log("Rejected comment: " + regexp);
+    }
+
+    @Override
+    public void acceptBlockComment(String substring, String sufix) {
+        throw new NotImplementedException("Block comments not yet supported");
     }
 }
