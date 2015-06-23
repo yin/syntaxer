@@ -27,6 +27,7 @@ import yajco.model.pattern.ConceptPattern;
 import yajco.model.pattern.NotationPartPattern;
 import yajco.model.pattern.NotationPattern;
 import yajco.model.pattern.PropertyPattern;
+import yajco.model.pattern.impl.Identifier;
 import yajco.model.pattern.impl.Operator;
 import yajco.model.pattern.impl.References;
 
@@ -131,6 +132,8 @@ public class HighlightingGenerator implements CompilerGenerator {
             if (!regexp.trim().isEmpty()) {
                 model.addToken("comments", regexp);
                 _log("ACCEPTED comment: " + regexp);
+            } else {
+                
             }
         }
 
@@ -141,12 +144,12 @@ public class HighlightingGenerator implements CompilerGenerator {
     }
 
     public static class LanguageVisitor {
-
         private static final String WHITESPACE_REGEXP = "^(\\[|\\[)?( |\\\\s|\\\\t|\\\\n|\\\\r)";
         private static final String OPERATOR_REGEXP = "^((?!\\\\s)[^\\s])+$";
-        private static final String KEYWORD_REGEXP = "^[a-zA-Z0-9]+$";
+        private static final String KEYWORD_REGEXP = "^[a-zA-Z_]+[a-zA-Z0-9_\\-]*$";
         private static final String NUMBER_LITERAL_REGEXP = "([0-9]+|[0-9]*\\.[0-9]+|0x[0-9a-fA-F]+)";
         private static final String STRING_LITERAL_REGEXP = "\"[^\"]*\"";
+
         private final LanguageAcceptor acceptor;
         private VisitorState state = new VisitorState();
 
@@ -195,6 +198,7 @@ public class HighlightingGenerator implements CompilerGenerator {
             state.closeConcept();
         }
 
+        // Concept children - ConceptPattern, Property, Notation
         private void visit(ConceptPattern pattern) {
             _log(">>  ConceptPattern(@Operator): " + pattern.toString());
             if (pattern instanceof Operator) {
@@ -208,14 +212,15 @@ public class HighlightingGenerator implements CompilerGenerator {
             _log(">> Property (fields+constructor.params): " + property.getName() + " type:"
                     + property.getType());
             for (PropertyPattern propPattern : property.getPatterns()) {
-                visit(propPattern);
+                if (propPattern instanceof Identifier) {
+                    Identifier identifier = (Identifier) propPattern;
+                    visit(identifier);
+                } else {
+                    visit(propPattern);
+                }
             }
         }
-
-        private void visit(PropertyPattern propertyPattern) {
-            _log(">>> PropertyPattern(@Identifier): " + propertyPattern.toString());
-        }
-
+        
         private void visit(Notation notation) {
             _log(">> Notation(constructor): " + notation);
             for (NotationPart notationPart : notation.getParts()) {
@@ -225,6 +230,16 @@ public class HighlightingGenerator implements CompilerGenerator {
                 visit(notationPattern);
             }
         }
+        
+        // Concept grandchildren - PropertyPattern, NotationPart, NotationPattern
+        private void visit(PropertyPattern propertyPattern) {
+            _log(">>> PropertyPattern(@Identifier): " + propertyPattern.toString());
+        }
+
+        private void visit(Identifier identifier) {
+            _log(">>>> Identifier(PropertyPattern): unique:" + identifier.getUnique());
+        }
+
 
         private void visit(NotationPart notationPart) {
             _log(">>> NotationPart: " + notationPart);
@@ -237,6 +252,10 @@ public class HighlightingGenerator implements CompilerGenerator {
                 // name references
                 visit((LocalVariablePart) notationPart);
             }
+        }
+
+        private void visit(NotationPattern notationPattern) {
+            _log(">>> NotationPattern(@Factory) " + notationPattern.toString());
         }
 
         private void visit(TokenPart tokenPart) {
@@ -278,10 +297,6 @@ public class HighlightingGenerator implements CompilerGenerator {
                 References ref = (References) notationPartPatttern;
                 _log("      ref.property = " + ref.getProperty().getName());
             }
-        }
-
-        private void visit(NotationPattern notationPattern) {
-            _log(">>> NotationPattern(@Factory) " + notationPattern.toString());
         }
 
         // Utils
@@ -339,7 +354,11 @@ public class HighlightingGenerator implements CompilerGenerator {
         }
     }
 
-    private static void _log(Object msg) {
-        System.out.println(msg);
-    }
+            private static void _log(Object msg) {
+                System.out.println(msg);
+            }
+
+            private static void _warn(Object msg) {
+                System.out.println(msg);
+            }
 }
