@@ -1,8 +1,5 @@
 package sk.tuke.yin.syntaxer;
 
-import org.apache.commons.lang.NotImplementedException;
-
-import sk.tuke.yin.syntaxer.LanguageAcceptor;
 import sk.tuke.yin.syntaxer.model.SimpleModel;
 import yajco.model.Language;
 
@@ -53,6 +50,6 @@ public class ModelAcceptor implements LanguageAcceptor {
 
     @Override
     public void acceptBlockComment(String substring, String sufix) {
-        throw new NotImplementedException("Block comments not yet supported");
+        HighlightingCompiler._warn("Block comments not yet supported");
     }
 }
