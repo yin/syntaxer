@@ -59,7 +59,11 @@ public class LanguageVisitor {
                     String sufix = regexp.substring(len - 2, len);
                     acceptor.acceptBlockComment(regexp.substring(0, 2), sufix);
                 } else {
-                    int prefixLen = Math.min(regexp.indexOf("."), regexp.indexOf('['));
+                    int idxDot = regexp.indexOf(".");
+                    int idxChSet = regexp.indexOf('[');
+                    int prefixLen = 2;
+                    if(idxDot > 0) prefixLen = Math.min(prefixLen, idxDot);
+                    if(idxChSet > 0) prefixLen = Math.min(prefixLen, idxChSet);
                     acceptor.acceptLineComment(regexp.substring(0, prefixLen));
                 }
             } else {
