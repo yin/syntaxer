@@ -21,7 +21,7 @@ import yajco.model.pattern.impl.References;
 
 public class LanguageVisitor {
     private static final String WHITESPACE_REGEXP = "^(\\[|\\[)?( |\\\\s|\\\\t|\\\\n|\\\\r)";
-    private static final String LINE_COMMENT_REGEXP = "\\n$";
+    private static final String BLOCK_COMMENT_REGEXP = "[^n]$";
     private static final String OPERATOR_REGEXP = "^((?!\\\\s)[^\\s])+$";
     private static final String KEYWORD_REGEXP = "^[a-zA-Z_]+[a-zA-Z0-9_\\-]*$";
     private static final String NUMBER_LITERAL_REGEXP = "([0-9]+|[0-9]*\\.[0-9]+|0x[0-9a-fA-F]+)";
@@ -53,12 +53,13 @@ public class LanguageVisitor {
         if (regexp.length() > 0) {
             // TODO yin: This is very crude way of detecting non-whitespace characters in regexp
             if (!regexp.matches(WHITESPACE_REGEXP)) {
-                if (regexp.matches(LINE_COMMENT_REGEXP)) {
-                    acceptor.acceptLineComment(regexp);
-                } else {
+                // TODO yin: Fixed size prefixes and sufixes are not a good idea
+                if (regexp.matches(BLOCK_COMMENT_REGEXP) && regexp.length() > 4) {
                     int len = regexp.length();
-                    String sufix = regexp.substring(len - 2, len - 1);
-                    acceptor.acceptBlockComment(regexp.substring(0, 1), sufix);
+                    String sufix = regexp.substring(len - 2, len);
+                    acceptor.acceptBlockComment(regexp.substring(0, 2), sufix);
+                } else {
+                    acceptor.acceptLineComment(regexp.substring(0, 2));
                 }
             } else {
                 acceptor.acceptWhitespace(regexp);

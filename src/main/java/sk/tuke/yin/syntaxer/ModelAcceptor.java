@@ -50,6 +50,6 @@ public class ModelAcceptor implements LanguageAcceptor {
 
     @Override
     public void acceptBlockComment(String substring, String sufix) {
-        HighlightingCompiler._warn("Block comments not yet supported");
+        HighlightingCompiler._warn("Block comments not yet supported: " + substring + " " + sufix);
     }
 }
