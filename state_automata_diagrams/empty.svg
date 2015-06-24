@@ -14,7 +14,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="empty.svg">
+   sodipodi:docname="empty.svg"
+   inkscape:export-filename="/home/yin/git/syntaxer-docs/state_automata_diagrams/empty.png"
+   inkscape:export-xdpi="326.48999"
+   inkscape:export-ydpi="326.48999">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -31,9 +34,9 @@
      inkscape:current-layer="layer1"
      showgrid="false"
      units="cm"
-     inkscape:window-width="636"
+     inkscape:window-width="956"
      inkscape:window-height="1023"
-     inkscape:window-x="948"
+     inkscape:window-x="960"
      inkscape:window-y="36"
      inkscape:window-maximized="0">
     <inkscape:grid
@@ -52,7 +55,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -69,7 +72,7 @@
        sodipodi:cy="176.05486"
        sodipodi:rx="145.46196"
        sodipodi:ry="79.296974"
-       d="m 478.8123,176.05486 a 145.46196,79.296974 0 1 1 -290.92392,0 145.46196,79.296974 0 1 1 290.92392,0 z"
+       d="m 478.8123,176.05486 c 0,43.7945 -65.12554,79.29697 -145.46196,79.29697 -80.33642,0 -145.46196,-35.50247 -145.46196,-79.29697 0,-43.79451 65.12554,-79.296979 145.46196,-79.296979 80.33642,0 145.46196,35.502469 145.46196,79.296979 z"
        transform="matrix(0.6632703,0,0,0.61151205,-115.54044,878.03244)" />
     <path
        sodipodi:type="arc"
@@ -79,7 +82,7 @@
        sodipodi:cy="190.19699"
        sodipodi:rx="15.657365"
        sodipodi:ry="15.657365"
-       d="m 263.64981,190.19699 a 15.657365,15.657365 0 1 1 -31.31473,0 15.657365,15.657365 0 1 1 31.31473,0 z"
+       d="m 263.64981,190.19699 c 0,8.64732 -7.01004,15.65737 -15.65736,15.65737 -8.64733,0 -15.65737,-7.01005 -15.65737,-15.65737 0,-8.64732 7.01004,-15.65736 15.65737,-15.65736 8.64732,0 15.65736,7.01004 15.65736,15.65736 z"
        transform="matrix(0.6632703,0,0,0.61151205,-126.2605,867.68563)" />
     <path
        sodipodi:type="arc"
@@ -89,7 +92,7 @@
        sodipodi:cy="190.19699"
        sodipodi:rx="15.657365"
        sodipodi:ry="15.657365"
-       d="m 263.64981,190.19699 a 15.657365,15.657365 0 1 1 -31.31473,0 15.657365,15.657365 0 1 1 31.31473,0 z"
+       d="m 263.64981,190.19699 c 0,8.64732 -7.01004,15.65737 -15.65736,15.65737 -8.64733,0 -15.65737,-7.01005 -15.65737,-15.65737 0,-8.64732 7.01004,-15.65736 15.65737,-15.65736 8.64732,0 15.65736,7.01004 15.65736,15.65736 z"
        transform="matrix(0.6632703,0,0,0.61151205,6.7353248,867.68563)" />
     <text
        xml:space="preserve"

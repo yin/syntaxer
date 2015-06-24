@@ -14,7 +14,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="example-seqrep.svg">
+   sodipodi:docname="example-seqrep.svg"
+   inkscape:export-filename="/home/yin/git/syntaxer-docs/state_automata_diagrams/example-seqrep.png"
+   inkscape:export-xdpi="245.48"
+   inkscape:export-ydpi="245.48">
   <defs
      id="defs4">
     <marker
@@ -110,7 +113,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.0037778"
-     inkscape:cx="189.14273"
+     inkscape:cx="106.29921"
      inkscape:cy="9.6327943"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"

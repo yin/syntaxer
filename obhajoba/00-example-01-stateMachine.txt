@@ -1,0 +1,4 @@
+state A
+state B
+
+trans AtoB: A -> B

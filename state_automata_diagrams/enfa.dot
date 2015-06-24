@@ -1,0 +1,16 @@
+digraph exampleEpsilonNFA {
+  rankdir=LR;
+  S [label="",style=invis]
+  S -> A;
+  A -> B [label="0"];
+  A -> C [label="1"];
+  B -> C [label="1"];
+  B -> D [label="e"];
+  B -> E [label="e"];
+  C -> A [label="0"];
+  D -> E [label="0"];
+  D -> F [label="1"];
+  E -> A [label="0"];
+  F -> B [label="0"];
+  C [peripheries=2]
+}
