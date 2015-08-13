@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE language SYSTEM "language.dtd">
-<language id="$languageName" name="YajCo $languageName" version="1.00" section="Source">
+<language id="$languageName" _name="YajCo $languageName" version="2.00" _section="Source">
   <metadata>
     <mimetypes></mimetypes>
     <globs></globs>
@@ -9,7 +9,7 @@
       <property name="line-comment-start">$comment</property>
     #end
     #end
-  <metadata>
+  </metadata>
   
   <styles>
     <style id="normalStyle" name="Text"/>
