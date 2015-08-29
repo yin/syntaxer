@@ -12,9 +12,11 @@ import com.google.common.collect.ImmutableList.Builder;
 /** Provides basic functionality for most Editor strategies. */
 public class GeneralEditorStrategy implements EditorStrategy {
     private static final String[] TOKEN_TYPES = new String[] { "keywords", "operators",
-            "literalStrings", "literalChars", "literal.NUMBER", "literalOthers", "comments" };
+            "literalStrings", "literalChars", "literal.NUMBER", "literalOthers", "linecomments" };
 
-    private static final String[] VALUES = new String[] { "languageName" };
+    private static final String[] VALUES = new String[] { "languageId", "languageName", "globs", "mimetypes" };
+
+    private static final String[] OBJECTS = new String[] { "blockcomments" };
 
     private final String editorId;
     private final String editorName;
@@ -62,6 +64,9 @@ public class GeneralEditorStrategy implements EditorStrategy {
         for (String type : TOKEN_TYPES) {
             setTokens(type, model, context);
         }
+        for (String type : OBJECTS) {
+            setObject(type, model, context);
+        }
         return context;
     }
 
@@ -71,11 +76,19 @@ public class GeneralEditorStrategy implements EditorStrategy {
 
     private void setTokens(String type, Model model, VelocityContext context) {
         Iterable<String> items = model.getTokens(type);
-        ((SimpleModel)model).getAll("");
         Builder<String> builder = ImmutableList.builder();
         for (String item : items) {
             builder.add(transformRegexp(item, type));
         }
         context.put(type, builder.build());
     }
+
+    private void setObject(String type, Model model, VelocityContext context) {
+        Iterable<Object> item = model.getObject(type);
+        context.put(type, item);
+        System.out.println(type+"--------");
+        for(Object i:item){
+        System.out.println(type+"--------"+i.getClass().getName()+" "+i.toString());
+        }
+     }
 }

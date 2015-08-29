@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language SYSTEM "language.dtd">
+<language id="yajcoexamplesmlmodel" _name="YajCo yajco.example.sml.model" version="2.0" _section="Source">
+  <metadata>
+    <property name="mimetypes">plain/text</property>
+    <property name="globs">*.st</property>
+              <property name="line-comment-start">#</property>
+          </metadata>
+  
+  <styles>
+    <style id="normalStyle" name="Text"/>
+    <!-- style id="keywordStyle" name="Keyword"/-->
+    <style id="keyword" _name="keyword" map-to="def:keyword"/>
+  </styles>
+  <definitions>
+    <context id="yajcoexamplesmlmodel">
+      <include>
+        <context id="keyword" style-ref="keyword">
+                <keyword>state</keyword>
+                <keyword>trans</keyword>
+       </context>
+      </include>
+    </context>
+  </definitions>
+</language>

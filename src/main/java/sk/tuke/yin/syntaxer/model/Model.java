@@ -2,12 +2,16 @@ package sk.tuke.yin.syntaxer.model;
 
 public interface Model {
 
-    public void addToken(String token, String type);
+    void addToken(String token, String type);
 
-    public Iterable<String> getTokens(String type);
+    Iterable<String> getTokens(String type);
 
-    public void setValue(String token, String type);
+    void setValue(String token, String type);
 
-    public String getValue(String type);
+    String getValue(String type);
+
+	void addObject(String type, Object object);
+
+	Iterable<Object> getObject(String type);
 
 }

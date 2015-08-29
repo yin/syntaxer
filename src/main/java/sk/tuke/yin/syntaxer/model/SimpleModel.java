@@ -9,6 +9,7 @@ import com.google.common.collect.Multimap;
 public class SimpleModel implements Model {
     private Multimap<String, String> tokens = ArrayListMultimap.<String, String>create();
     private Map<String, String> values = Maps.newHashMap();
+    private Multimap<String, Object> objects = ArrayListMultimap.<String, Object>create();
     
     @Override
     public void addToken(String type, String regexp) {
@@ -20,8 +21,10 @@ public class SimpleModel implements Model {
         return tokens.get(type);
     }
 
-    public void getAll(String type) {
+    public void debug() {
         System.out.println(tokens);
+        System.out.println(values);
+        System.out.println(objects);
     }
     
     @Override
@@ -33,4 +36,15 @@ public class SimpleModel implements Model {
     public String getValue(String type) {
         return values.get(type);
     }
+
+	@Override
+	public void addObject(String type, Object object) {
+		objects.put(type, object);
+        System.out.println(type+"++++++++++"+object.getClass().getName()+" "+object.toString());
+		
+	}
+	@Override
+	public Iterable<Object> getObject(String type) {
+		return objects.get(type);
+	}
 }

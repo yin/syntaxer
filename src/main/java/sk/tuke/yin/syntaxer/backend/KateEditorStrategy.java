@@ -12,6 +12,6 @@ public class KateEditorStrategy extends GeneralEditorStrategy {
 
     @Override
     protected String transformRegexp(String regexp, String type) {
-        return regexp.replaceAll("\\\\n\\)?\\$?$", "\\$");
+        return super.transformRegexp(regexp.replaceAll("\\\\n\\)?\\$?$", "\\$"), type);
     }
 }

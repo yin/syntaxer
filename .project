@@ -20,4 +20,11 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.m2e.core.maven2Nature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>yajco-head/yajco-examples</name>
+			<type>2</type>
+			<location>/home/yin/git/yajco-examples</location>
+		</link>
+	</linkedResources>
 </projectDescription>

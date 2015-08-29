@@ -21,7 +21,8 @@ import yajco.model.pattern.impl.References;
 
 public class LanguageVisitor {
     private static final String WHITESPACE_REGEXP = "^(\\[|\\[)?( |\\\\s|\\\\t|\\\\n|\\\\r)";
-    private static final String BLOCK_COMMENT_REGEXP = "[^n]$";
+    private static final String LINE_COMMENT_MARKER = "\\n";
+    private static final String BLOCK_COMMENT_REGEXP = "^[^\\[\\(.]+.*[^\\]\\).]+$";
     private static final String OPERATOR_REGEXP = "^((?!\\\\s)[^\\s])+$";
     private static final String KEYWORD_REGEXP = "^[a-zA-Z_]+[a-zA-Z0-9_\\-]*$";
     private static final String NUMBER_LITERAL_REGEXP = "([0-9]+|[0-9]*\\.[0-9]+|0x[0-9a-fA-F]+)";
@@ -51,26 +52,62 @@ public class LanguageVisitor {
         HighlightingCompiler._log("> SkipDef: " + skip.toString());
         String regexp = skip.getRegexp();
         if (regexp.length() > 0) {
+        	System.out.println("++Skip:"+skip.getRegexp());
             // TODO yin: This is very crude way of detecting non-whitespace characters in regexp
             if (!regexp.matches(WHITESPACE_REGEXP)) {
-                // TODO yin: Fixed size prefixes and sufixes are not a good idea
-                if (regexp.matches(BLOCK_COMMENT_REGEXP) && regexp.length() > 4) {
+            	if (regexp.contains(LINE_COMMENT_MARKER)) {
+                	System.out.println("++Skip->linec");
+        		    acceptor.acceptLineComment(findPrefix(regexp));
+                } else if (regexp.matches(BLOCK_COMMENT_REGEXP) && regexp.length() > 4) {
+                	System.out.println("++Skip->blockc");
                     int len = regexp.length();
                     String sufix = regexp.substring(len - 2, len);
-                    acceptor.acceptBlockComment(regexp.substring(0, 2), sufix);
+                    acceptor.acceptBlockComment(findPrefix(regexp), findSufix(regexp));
                 } else {
-                    int idxDot = regexp.indexOf(".");
-                    int idxChSet = regexp.indexOf('[');
-                    int prefixLen = 2;
-                    if(idxDot > 0) prefixLen = Math.min(prefixLen, idxDot);
-                    if(idxChSet > 0) prefixLen = Math.min(prefixLen, idxChSet);
-                    acceptor.acceptLineComment(regexp.substring(0, prefixLen));
+                	acceptor.acceptWhitespace(regexp);
                 }
             } else {
+            	System.out.println("++Skip->ws");
                 acceptor.acceptWhitespace(regexp);
             }
         }
     }
+
+	private String findPrefix(String regexp) {
+		int idxDot = regexp.indexOf(".");
+		int idxChSet = regexp.indexOf('[');
+		int idxbkSl = regexp.indexOf("\\s");
+		int prefixLen = regexp.length() - 1;
+		if(idxDot > 0) prefixLen = Math.min(prefixLen, idxDot);
+		if(idxChSet > 0) prefixLen = Math.min(prefixLen, idxChSet);
+		if(idxbkSl > 0) prefixLen = Math.min(prefixLen, idxbkSl);
+		if(regexp.startsWith("^")) {
+			return regexp.substring(1, prefixLen-1);
+		} else {
+			return regexp.substring(0, prefixLen);
+		}
+	}
+
+	private String findSufix(String regexp) {
+		int idxDot = regexp.lastIndexOf(".");
+		int idxChSet = regexp.lastIndexOf(']');
+		int idxbkSl = regexp.lastIndexOf("\\s");
+		int idxREQs = regexp.lastIndexOf("\\*");
+		int idxREQp = regexp.lastIndexOf("\\*");
+		int idxREQq = regexp.lastIndexOf("\\*");
+		int prefixLen = 0;
+		if(idxDot > 0) prefixLen = Math.max(prefixLen, idxDot + 1);
+		if(idxChSet > 0) prefixLen = Math.max(prefixLen, idxChSet + 1);
+		if(idxbkSl > 0) prefixLen = Math.max(prefixLen, idxbkSl + 3);
+		if(idxREQs > 0) prefixLen = Math.max(prefixLen, idxREQs);
+		if(idxREQp > 0) prefixLen = Math.max(prefixLen, idxREQp);
+		if(idxREQq > 0) prefixLen = Math.max(prefixLen, idxREQq);
+		if(regexp.endsWith("$")) {
+			return regexp.substring(prefixLen, regexp.length()-prefixLen-1);
+		} else {
+			return regexp.substring(prefixLen, regexp.length());
+		}
+	}
 
     private void visit(Concept concept) {
         HighlightingCompiler._log("> Concept: " + concept.getName());

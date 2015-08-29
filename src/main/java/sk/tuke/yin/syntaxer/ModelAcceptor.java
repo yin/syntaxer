@@ -11,8 +11,19 @@ public class ModelAcceptor implements LanguageAcceptor {
     }
 
     @Override
+    public void acceptGlobs(String globs) {
+        model.setValue("globs", globs);
+    }
+
+    @Override
+    public void acceptMimetypes(String mimetypes) {
+        model.setValue("mimetypes", mimetypes);
+    }
+
+    @Override
     public void acceptLanguage(Language language) {
         model.setValue("languageName", language.getName());
+        model.setValue("languageId", language.getName().replaceAll("\\.", ""));
     }
 
     @Override
@@ -36,7 +47,7 @@ public class ModelAcceptor implements LanguageAcceptor {
     @Override
     public void acceptLineComment(String regexp) {
         if (!regexp.trim().isEmpty()) {
-            model.addToken("comments", regexp);
+            model.addToken("linecomments", regexp);
             HighlightingCompiler._log("ACCEPTED comment: " + regexp);
         } else {
             acceptWhitespace(regexp);
@@ -49,7 +60,26 @@ public class ModelAcceptor implements LanguageAcceptor {
     }
 
     @Override
-    public void acceptBlockComment(String substring, String sufix) {
-        HighlightingCompiler._warn("Block comments not yet supported: " + substring + " " + sufix);
+    public void acceptBlockComment(String prefix, String sufix) {
+        Block block = new Block(prefix, sufix);
+		model.addObject("blockcomments", block);
+        HighlightingCompiler._log("ACCEPTED blockcomment: " + block);
+    }
+    
+	public static class Block {
+    	private String left, right;
+    	Block(String left, String right) {
+    		this.left = left;
+    		this.right = right;
+    	}
+    	public String getLeft() {
+    		return left;
+    	}
+    	public String getRight() {
+    		return right;
+    	}
+    	public String toString() {
+			return new StringBuilder().append(left).append(":").append(right).toString();
+		}
     }
 }

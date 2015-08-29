@@ -14,6 +14,7 @@ import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
 import sk.tuke.yin.syntaxer.model.Model;
+import sk.tuke.yin.syntaxer.model.SimpleModel;
 
 public class VelocityBackend {
     private final EditorStrategy strategy;
@@ -25,6 +26,8 @@ public class VelocityBackend {
     }
 
     public void write(Model model) throws IOException {
+        ((SimpleModel)model).debug();
+
         VelocityEngine ve = new VelocityEngine();
         ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
         ve.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());

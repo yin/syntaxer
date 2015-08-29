@@ -1,29 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE language SYSTEM "language.dtd">
-<language id="$languageName" _name="YajCo $languageName" version="2.00" _section="Source">
+<language id="$languageId" _name="YajCo $languageName" version="2.0" _section="Source">
   <metadata>
-    <mimetypes></mimetypes>
-    <globs></globs>
-    #if (!$comments.isEmpty() )
-    #foreach ($comment in $comments)
+    #if ($mimetypes)
+    <property name="mimetypes">$mimetypes</property>
+    #end
+    #if ($globs)
+    <property name="globs">$globs</property>
+    #end
+    #if (!$linecomments.isEmpty() )
+    #foreach ($comment in $linecomments)
       <property name="line-comment-start">$comment</property>
+    #end
+    #end
+    #if (!$blockcomments.isEmpty() )
+    #foreach ($comment in $blockcomments)
+      <property name="block-comment-start">${comment.left}</property>
+      <property name="block-comment-end">${comment.right}</property>
     #end
     #end
   </metadata>
   
   <styles>
-    <style id="normalStyle" name="Text"/>
-    <style id="keywordStyle" name="Keyword"/>
+    <style id="comment" _name="comment" map-to="def:comment"/>
+    <style id="keyword" _name="keyword" map-to="def:keyword"/>
   </styles>
   <definitions>
-    <context id="lang" style-ref="normalStyle">
-      #if (!$keywords.isEmpty() )
-        <context id="keyword" style-ref="keywordStyle">
+    <context id="$languageId" class="no-spell-check">
+      <include>
+        #if (!$keywords.isEmpty() )
+        <context id="keyword" style-ref="keyword">
           #foreach ($keyword in $keywords)
             <keyword>$keyword</keyword>
           #end
          </context>
-       #end
+         #end
+         #if (!$linecomments.isEmpty() )
+         #foreach ($comment in $linecomments)
+         <context id="line-comment" style-ref="comment" end-at-line-end="true" class="comment" class-disabled="no-spell-check">
+       	   <start>$comment</start>
+      		 <include>
+        	   <context ref="def:in-line-comment"/>
+      		 </include>
+    	 </context>
+         #end
+         #end
+         #if (!$blockcomments.isEmpty() )
+         #foreach ($comment in $blockcomments)
+         <context id="block-comment" style-ref="comment" class="comment" class-disabled="no-spell-check">
+      	   <start>${comment.left}</start>
+      	   <end>${comment.right}</end>
+      	   <include>
+        	 <context ref="def:in-comment"/>
+      	   </include>
+    	 </context>
+         #end
+         #end
+       </include>
      </context>
    </definitions>
 </language>

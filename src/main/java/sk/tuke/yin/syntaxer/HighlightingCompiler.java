@@ -18,6 +18,8 @@ public class HighlightingCompiler implements CompilerGenerator {
 
     private static final String DEFAULT_EDITOR = "kate";
     private static final String EDITOR_ID_VAR = "editor";
+    private static final String GLOBS_ID_VAR = "globs";
+	private static final String MIMETYPES_ID_VAR = "mimetypes";
 
     //    private static final String EDITOR_ID_KEY = "syntaxer.editor";
 
@@ -37,6 +39,7 @@ public class HighlightingCompiler implements CompilerGenerator {
         ModelAcceptor acceptor = new ModelAcceptor(model);
         LanguageVisitor visitor = new LanguageVisitor(acceptor);
         visitor.visit(language);
+        postProcessModel(acceptor);
         try {
             //TODO yin: make target editor an argument
             VelocityBackend backend = new VelocityBackend.BackendBuilder()
@@ -48,7 +51,18 @@ public class HighlightingCompiler implements CompilerGenerator {
         }
     }
 
-    private static String getEditorId() {
+    private void postProcessModel(ModelAcceptor acceptor) {
+        String globs = System.getProperty(GLOBS_ID_VAR);
+        if (globs != null) {
+            acceptor.acceptGlobs(globs);
+        }
+        String mimetypes = System.getProperty(MIMETYPES_ID_VAR);
+        if (mimetypes != null) {
+            acceptor.acceptMimetypes(mimetypes);
+        }
+	}
+
+	private static String getEditorId() {
         String id = System.getProperty(EDITOR_ID_VAR);
         if (id == null) {
             id = DEFAULT_EDITOR;

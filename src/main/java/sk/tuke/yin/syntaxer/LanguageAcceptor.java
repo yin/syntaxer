@@ -3,21 +3,25 @@ package sk.tuke.yin.syntaxer;
 import yajco.model.Language;
 
 public interface LanguageAcceptor {
-    public static enum LiteralType {
+    static enum LiteralType {
         NUMBER, STRING, CHAR, OTHER;
     }
     
-    public void acceptLanguage(Language language);
+    void acceptLanguage(Language language);
 
-    public void acceptKeyword(String keyword);
+	void acceptGlobs(String glob);
 
-    public void acceptOperator(String operator);
+	void acceptMimetypes(String mimetypes);
 
-    public void acceptLiteral(String regexp, LiteralType type);
+    void acceptKeyword(String keyword);
 
-    public void acceptWhitespace(String regexp);
+    void acceptOperator(String operator);
 
-    public void acceptLineComment(String regexp);
+    void acceptLiteral(String regexp, LiteralType type);
 
-    public void acceptBlockComment(String substring, String sufix);
+    void acceptWhitespace(String regexp);
+
+    void acceptLineComment(String regexp);
+
+    void acceptBlockComment(String prefix, String sufix);
 }
